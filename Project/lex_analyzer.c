@@ -59,6 +59,10 @@ void handle_number(scanner* sc, lex_token* t){
 
 }
 
+void get_string_literal(scanner* sc, lex_token* t){
+
+}
+
 lex_token get_next_token(scanner* sc){
     lex_token t;
     t.type = ERROR;
@@ -68,6 +72,10 @@ lex_token get_next_token(scanner* sc){
     while(true){
         char c = (char)getc(sc->source);
         switch(c){
+            case '"':
+                get_string_literal(sc, t);
+                t.type = STRING;
+                return t;
             case '\n':
                 t.type = END_OF_LINE;
                 return t;
