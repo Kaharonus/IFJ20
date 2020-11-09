@@ -40,6 +40,28 @@ int read_next_word(scanner * source, char* word, int size){
 }
 
 
+void handle_comments(scanner* sc){
+    char firstChar = (char)getc(sc->source);   
+    char secondChar =  (char)getc(sc->source);
+
+    if (firstChar == '/' && secondChar == '/') {
+        char checkChar = (char)getc(sc->source);
+        while (checkChar != '/n') {
+            checkChar = (char)getc(sc->source);
+        }
+    } else if (firstChar == '/' && secondChar == '*'){
+        char checkChar = (char)getc(sc->source);
+        char checkChar2 = NULL;
+        while (checkChar != '*' && checkChar2 != '/') {
+            checkChar = (char)getc(sc->source);
+            if (checkChar == '*'){
+                checkChar2 = (char)getc(sc->source);
+            }
+        }
+    }
+
+}
+
 void handle_word(scanner* sc, lex_token* t){
     char* word = calloc(256, sizeof(char));
     if(word == NULL){
@@ -52,6 +74,7 @@ void handle_word(scanner* sc, lex_token* t){
     }else{
         t->type = ID;
         t->string_value = word;
+
     }
 }
 
