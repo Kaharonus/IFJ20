@@ -34,15 +34,15 @@ const char TOKEN_TYPES[][30] = {
     "GREATER_OR_EQ",
     "LESSER_OR_EQ",
     "EQ",
-    "NON_EQ",
-    "COLON",
+    "NOT_EQ",
     "COMMA",
     "OPEN_PARENTHESIS",
     "CLOSE_PARENTHESIS",
     "OPEN_BRACKET",
     "CLOSE_BRACKET",
     "END_OF_FILE",
-    "END_OF_LINE"
+    "END_OF_LINE",
+    "VAR_DEF"
 };
 
 //Switch nefunguje - nelze použít strcmp ve switchi a v C jinak string neporovnám...

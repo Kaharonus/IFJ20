@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     scan.source = f;
     lex_token t;
     while((t=get_next_token(&scan)).type != END_OF_FILE){
-        fprintf(stderr,"TOKEN: %s, %s, %s, %f, %d \n",TOKEN_TYPES[t.type], KEYWORDS[t.keyword_value], t.string_value, t.number_value.d, t.number_value.i);
+        fprintf(stderr,"TOKEN: %s, %s, %s, %f, %d \n", TOKEN_TYPES[t.type], KEYWORDS[t.keyword_value], t.string_value, t.number_value.d, t.number_value.i);
     }
 
     return 0;

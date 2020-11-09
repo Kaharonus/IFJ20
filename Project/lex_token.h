@@ -24,8 +24,7 @@ typedef enum {
     GREATER_OR_EQ,
     LESSER_OR_EQ,
     EQ,
-    NON_EQ,
-    COLON,
+    NOT_EQ,
     COMMA,
     OPEN_PARENTHESIS,
     CLOSE_PARENTHESIS,
@@ -33,6 +32,7 @@ typedef enum {
     CLOSE_BRACKET,
     END_OF_FILE,
     END_OF_LINE,
+    VAR_DEF
 } lex_token_type;
 
 typedef enum {

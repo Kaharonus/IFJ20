@@ -59,6 +59,45 @@ void handle_number(scanner* sc, lex_token* t){
 
 }
 
+
+void handle_comparison(scanner* sc, lex_token* t, char c){
+    char next = (char)getc(sc->source);
+    switch(c){
+        case ':':
+            if(next == '='){
+                t->type = VAR_DEF;
+            }
+            break;
+        case '=':
+            if(next != '='){
+                t->type = ASSIGN;
+                break;
+            }
+            t->type = EQ;
+            break;
+        case '<':
+            if(next == '='){
+                t->type = LESSER_OR_EQ;
+                break;
+            }
+            t->type = LESSER;
+            break;
+        case '>':
+            if(next == '='){
+                t->type = GREATER_OR_EQ;
+                break;
+            }
+            t->type = GREATER;
+            break;
+        case '!':
+            if(next != '='){
+                break;
+            }
+            t->type = NOT_EQ;
+            break;
+    }
+}
+
 lex_token get_next_token(scanner* sc){
     lex_token t;
     t.type = ERROR;
@@ -97,9 +136,16 @@ lex_token get_next_token(scanner* sc){
             case '*':
                 t.type = MUL;
                 return t;
-            case EOF:
-                t.type = END_OF_FILE;
+            case ':':
+            case '=':
+            case '<':
+            case '>':
+            case '!':
+                handle_comparison(sc,&t,c);
                 return t;
+            case EOF:
+            t.type = END_OF_FILE;
+            return t;
             default:
                 if(is_letter(c) || c == '_'){
                     ungetc(c,sc->source);
