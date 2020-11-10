@@ -93,7 +93,7 @@ char* get_string_literal(scanner* sc, lex_token* t){
                     int first = c/16 - 3;
                     int second = c % 16;
                     int res = (first*10)+second;
-                    char symb = (char)res;
+                    strLiteral[i] = (char)res;
                     break;
                 default:
                     throw_err(LA_ERR);
