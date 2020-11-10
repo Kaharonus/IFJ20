@@ -59,15 +59,19 @@ void handle_number(scanner* sc, lex_token* t){
 
 }
 
-void get_string_literal(scanner* sc, lex_token* t){
+char* get_string_literal(scanner* sc, lex_token* t){
     char* strLiteral[256] = (char*)malloc(sizeof(char));
     int i = 0;
     if (strLiteral == NULL){
         throw_err(INTERN_ERR);
     }
-    while(sc->source!='\"'){
-        if (sc->source == '\\'){
-            char c = (char)getc(sc->source);
+    while(true){
+        char c = (char)getc(sc->source);
+        if (c == '\"'){
+            return strLiteral;
+        }
+        if (c == '\\'){
+            c = (char)getc(sc->source);
             switch(c){
                 case '\"':
                     strLiteral[i] = '\"';
@@ -96,7 +100,7 @@ void get_string_literal(scanner* sc, lex_token* t){
                     break;
             }
         }else{
-            strLiteral[i] = (char)getc(sc->source);
+            strLiteral[i] = c;
             i++;
         }
     }
