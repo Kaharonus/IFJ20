@@ -60,7 +60,46 @@ void handle_number(scanner* sc, lex_token* t){
 }
 
 void get_string_literal(scanner* sc, lex_token* t){
-
+    char* strLiteral[256] = (char*)malloc(sizeof(char));
+    int i = 0;
+    if (strLiteral == NULL){
+        throw_err(INTERN_ERR);
+    }
+    while(sc->source!='\"'){
+        if (sc->source == '\\'){
+            char c = (char)getc(sc->source);
+            switch(c){
+                case '\"':
+                    strLiteral[i] = '\"';
+                    i++;
+                    break;
+                case '\n':
+                    strLiteral[i] = '\n';
+                    i++;
+                    break;
+                case '\t':
+                    strLiteral[i] = '\t';
+                    i++;
+                    break;
+                case '\\':
+                    strLiteral[i] = '\\';
+                    i++;
+                    break;
+                case 'x':
+                    int first = c/16 - 3;
+                    int second = c % 16;
+                    int res = (first*10)+second;
+                    char symb = (char)res;
+                    break;
+                default:
+                    throw_err(LA_ERR);
+                    break;
+            }
+        }else{
+            strLiteral[i] = (char)getc(sc->source);
+            i++;
+        }
+    }
 }
 
 lex_token get_next_token(scanner* sc){
@@ -73,7 +112,7 @@ lex_token get_next_token(scanner* sc){
         char c = (char)getc(sc->source);
         switch(c){
             case '"':
-                get_string_literal(sc, t);
+                get_string_literal(sc, &t);
                 t.type = STRING;
                 return t;
             case '\n':
