@@ -59,6 +59,53 @@ void handle_number(scanner* sc, lex_token* t){
 
 }
 
+char* get_string_literal(scanner* sc, lex_token* t){
+    char* strLiteral[256] = (char*)malloc(sizeof(char));
+    int i = 0;
+    if (strLiteral == NULL){
+        throw_err(INTERN_ERR);
+    }
+    while(true){
+        char c = (char)getc(sc->source);
+        if (c == '\"'){
+            return strLiteral;
+        }
+        if (c == '\\'){
+            c = (char)getc(sc->source);
+            switch(c){
+                case '\"':
+                    strLiteral[i] = '\"';
+                    i++;
+                    break;
+                case '\n':
+                    strLiteral[i] = '\n';
+                    i++;
+                    break;
+                case '\t':
+                    strLiteral[i] = '\t';
+                    i++;
+                    break;
+                case '\\':
+                    strLiteral[i] = '\\';
+                    i++;
+                    break;
+                case 'x':
+                    int first = c/16 - 3;
+                    int second = c % 16;
+                    int res = (first*10)+second;
+                    strLiteral[i] = (char)res;
+                    break;
+                default:
+                    throw_err(LA_ERR);
+                    break;
+            }
+        }else{
+            strLiteral[i] = c;
+            i++;
+        }
+    }
+}
+
 
 void handle_comparison(scanner* sc, lex_token* t, char c){
     char next = (char)getc(sc->source);
@@ -107,6 +154,10 @@ lex_token get_next_token(scanner* sc){
     while(true){
         char c = (char)getc(sc->source);
         switch(c){
+            case '"':
+                get_string_literal(sc, &t);
+                t.type = STRING;
+                return t;
             case '\n':
                 t.type = END_OF_LINE;
                 return t;
