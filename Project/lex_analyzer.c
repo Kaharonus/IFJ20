@@ -1,6 +1,3 @@
-//
-// Created by tomas on 09.11.20.
-//
 
 #include "lex_analyzer.h"
 
@@ -41,23 +38,20 @@ int read_next_word(scanner * source, char* word, int size){
 
 
 void handle_comments(scanner* sc){
-    char firstChar = (char)getc(sc->source);   
     char secondChar =  (char)getc(sc->source);
 
-    if (firstChar == '/' && secondChar == '/') {
+    if (secondChar == '/') {
         char checkChar = (char)getc(sc->source);
-        while (checkChar != '/n') {
+        while (checkChar != '\n') {
             checkChar = (char)getc(sc->source);
         }
-    } else if (firstChar == '/' && secondChar == '*'){
-        char checkChar = (char)getc(sc->source);
-        char checkChar2 = NULL;
-        while (checkChar != '*' && checkChar2 != '/') {
+    } else if (secondChar == '*'){
+        char checkChar;
+        char checkChar2;
+        do{
             checkChar = (char)getc(sc->source);
-            if (checkChar == '*'){
-                checkChar2 = (char)getc(sc->source);
-            }
-        }
+            checkChar2 = (char)getc(sc->source);
+        }while (checkChar != '*' || checkChar2 != '/');
     }
 
 }
@@ -74,7 +68,6 @@ void handle_word(scanner* sc, lex_token* t){
     }else{
         t->type = ID;
         t->string_value = word;
-
     }
 }
 
@@ -83,11 +76,16 @@ void handle_number(scanner* sc, lex_token* t){
 }
 
 char* get_string_literal(scanner* sc, lex_token* t){
-    char* strLiteral[256] = (char*)malloc(sizeof(char));
+    char* strLiteral = calloc(256, sizeof(char));
     int i = 0;
     if (strLiteral == NULL){
         throw_err(INTERN_ERR);
     }
+    int first;
+    int second;
+    int res;
+    t->string_value = strLiteral;
+
     while(true){
         char c = (char)getc(sc->source);
         if (c == '\"'){
@@ -113,9 +111,9 @@ char* get_string_literal(scanner* sc, lex_token* t){
                     i++;
                     break;
                 case 'x':
-                    int first = c/16 - 3;
-                    int second = c % 16;
-                    int res = (first*10)+second;
+                    first = c/16 - 3;
+                    second = c % 16;
+                    res = (first*10)+second;
                     strLiteral[i] = (char)res;
                     break;
                 default:
@@ -174,6 +172,7 @@ lex_token get_next_token(scanner* sc){
     t.keyword_value = NOT_KEYWORD;
     t.string_value = NULL;
     t.number_value.i = t.number_value.d = 0;
+    char next;
     while(true){
         char c = (char)getc(sc->source);
         switch(c){
@@ -207,6 +206,15 @@ lex_token get_next_token(scanner* sc){
             case '-':
                 t.type = SUB;
                 return t;
+            case '/':
+                next = (char)getc(sc->source);
+                if(next == '/' || next == '*'){
+                    ungetc(next, sc->source);
+                    handle_comments(sc);
+                    break;
+                }
+                t.type = DIV;
+                return t;
             case '*':
                 t.type = MUL;
                 return t;
@@ -218,8 +226,8 @@ lex_token get_next_token(scanner* sc){
                 handle_comparison(sc,&t,c);
                 return t;
             case EOF:
-            t.type = END_OF_FILE;
-            return t;
+                t.type = END_OF_FILE;
+                return t;
             default:
                 if(is_letter(c) || c == '_'){
                     ungetc(c,sc->source);

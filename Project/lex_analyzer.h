@@ -17,6 +17,7 @@ typedef struct{
 
 lex_token get_next_token(scanner* sc);
 
+
 #define PROJECT_LEX_ANALYZER_H
 
 #endif //PROJECT_LEX_ANALYZER_H
