@@ -23,13 +23,114 @@ symbol_type translate_keyword(keyword_type kw){
     return TYPE_NONE;
 }
 
-void check_block(tree_node *tree, scanner *s, symbol_table **table) {
+void check_basic_assignment(tree_node *tree, scanner *s, symbol_table **table){
+
+}
+
+void check_assignment(tree_node *tree, scanner *s, symbol_table **table){
+
+}
+
+void check_variable_definition(tree_node *tree, scanner *s, symbol_table **table){
+
+}
+
+void check_function_call(tree_node *tree, scanner *s, symbol_table **table){
+    lex_token token = get_next_token(s);
+    tree_node* node = create_node();
+    insert_node(tree, node);
+    node->type = FUNCTION_CALL;
+    node->string_value = token.string_value;
+    token = get_next_token(s);
+    token = get_next_token(s);
+    while(token.type != CLOSE_PARENTHESIS){
+        tree_node * param = create_node();
+        switch(token.type){
+            case ID:
+                param->type = IDENTIFICATOR;
+                param->string_value = token.string_value;
+                break;
+            case STRING:
+                param->type = VALUE;
+                param->value_type = TYPE_STRING;
+                param->string_value = token.string_value;
+                break;
+            case INT:
+                param->type = VALUE;
+                param->value_type = TYPE_INT;
+                param->number_value.i = token.number_value.i;
+                break;
+            case FLOAT:
+                param->type = VALUE;
+                param->value_type = TYPE_FLOAT;
+                param->number_value.d = token.number_value.d;
+                break;
+            case COMMA:
+                token = get_next_token(s);
+                continue;
+            default:
+                throw_err(SA_ERR);
+        }
+        insert_node(node, param);
+        token = get_next_token(s);
+    }
+}
+
+
+void check_block(tree_node *tree, scanner *s, symbol_table **table, symbol_table** root) {
     lex_token t = get_next_token(s);
     if (t.type != OPEN_BRACKET) {
         throw_err(SA_ERR);
     }
     while (t.type != CLOSE_BRACKET) {
         t = get_next_token(s);
+        switch (t.type) {
+            case DISCARD:
+            case ID:;
+                lex_token nextID = get_next_token(s);
+                unget_token(s,nextID);
+                unget_token(s,t);
+                switch (nextID.type) {
+                    case ASSIGN:
+                        check_basic_assignment(tree,s,table);
+                        break;
+                    case COMMA:
+                        check_assignment(tree,s,table);
+                        break;
+                    case VAR_DEF:
+                        check_variable_definition(tree,s,table);
+                        break;
+                    case OPEN_PARENTHESIS:
+                        check_function_call(tree,s,table);
+                        break;
+                    default:
+                        throw_err(SA_ERR);
+                }
+                break;
+            case KEYWORD:;
+                unget_token(s,t);
+                switch (t.keyword_value) {
+                    case FOR:
+                        check_basic_assignment(tree,s,table);
+                        break;
+                    case IF:
+                        check_assignment(tree,s,table);
+                        break;
+                    case RETURN:
+                        check_variable_definition(tree,s,table);
+                        break;
+                    default:
+                        throw_err(SA_ERR);
+                }
+                break;
+            case END_OF_LINE:
+                continue;
+            case CLOSE_BRACKET:
+                return;
+            default:
+                throw_err(SA_ERR);
+        }
+
     }
 
 }
@@ -114,7 +215,7 @@ void check_function_definition(tree_node *tree, scanner *s, symbol_table **table
     }
     unget_token(s,token);
     insert_node(tree, node);
-    check_block(node,s,sym->scope_table);
+    check_block(node,s,sym->scope_table, table);
 
 }
 

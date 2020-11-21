@@ -254,6 +254,9 @@ lex_token get_next_token(scanner* sc){
                 if(is_letter(c) || c == '_'){
                     ungetc(c,sc->source);
                     handle_word(sc, &t);
+                    if(t.type == ID && strcmp(t.string_value, "_") == 0){
+                        t.type = DISCARD;
+                    }
                     return t;
                 } else if (is_num_char(c)) {
                     ungetc(c,sc->source);

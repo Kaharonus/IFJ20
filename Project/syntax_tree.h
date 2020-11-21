@@ -50,10 +50,11 @@ typedef struct syntax_tree_node{
 
     number_value_token number_value;
     char* string_value;
-
+    symbol_type value_type;
 
     struct sym_table_struct* symbol;
     unsigned int subnode_len;
+
     unsigned int capacity;
     struct syntax_tree_node** nodes;
 

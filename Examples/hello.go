@@ -10,7 +10,7 @@ func test(){
 }
 
 func main(testVar int) {
-    print("hello world")
+    print("hello world", test)
 }
 
 func test2(testVar string, testSomething int){
