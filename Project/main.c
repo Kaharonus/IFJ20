@@ -13,8 +13,10 @@ int main(int argc, char *argv[]) {
         throw_err(INTERN_ERR);
     }
     scan.source = f;
-    symbol_table ** table;
-    tree_node** tree = get_syntax_tree(&scan, table);
+    scan.stack.index = 0;
+    symbol_table ** table = create_ht();
+    tree_node* tree = get_syntax_tree(&scan, table);
+    print_tree(tree);
 
     return 0;
 }

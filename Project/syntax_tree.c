@@ -40,7 +40,6 @@ tree_node *create_node() {
     node->number_value.d = node->number_value.i = 0;
     node->string_value = NULL;
     node->cond_type = OP_NONE;
-    node->type_value = TYPE_NONE;
     node->nodes = malloc(BASE_CAPACITY * sizeof(tree_node*));
     if (node->nodes == NULL) {
         throw_err(INTERN_ERR);
@@ -49,7 +48,7 @@ tree_node *create_node() {
 }
 void insert_node(tree_node* node, tree_node* new) {
     if ((node->subnode_len + 1) > node->capacity) {
-        struct node ** tmp = node->nodes;
+        tree_node ** tmp = node->nodes;
         node->nodes = realloc(node->nodes, node->capacity * 10);
         node->capacity *= 10;
     }

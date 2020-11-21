@@ -166,7 +166,29 @@ void handle_comparison(scanner* sc, lex_token* t, char c){
     }
 }
 
+
+
+bool token_stack_empty(token_stack* ts) {
+    return ts->index == 0;
+}
+
+lex_token token_stack_pop(token_stack* ts) {
+    if (!token_stack_empty(ts)) {
+        ts->index--;
+    }
+    return ts->data[ts->index+1];
+}
+void token_stack_push(token_stack * ts, lex_token t) {
+    ts->index++;
+    ts->data[ts->index] = t;
+}
+
+
+
 lex_token get_next_token(scanner* sc){
+    if(!token_stack_empty(&sc->stack)){
+        return token_stack_pop(&sc->stack);
+    }
     lex_token t;
     t.type = ERROR;
     t.keyword_value = NOT_KEYWORD;
@@ -241,4 +263,8 @@ lex_token get_next_token(scanner* sc){
         }
 
     }
+}
+
+void unget_token(scanner *sc, lex_token t) {
+    token_stack_push(&sc->stack, t);
 }

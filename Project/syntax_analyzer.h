@@ -10,6 +10,6 @@
 #include "symbol_table.h"
 
 
-tree_node** get_syntax_tree(scanner * source, symbol_table** table);
+tree_node* get_syntax_tree(scanner * source, symbol_table** table);
 
 #endif //PROJECT_SYNTAX_ANALYZER_H
