@@ -72,7 +72,48 @@ void handle_word(scanner* sc, lex_token* t){
 }
 
 void handle_number(scanner* sc, lex_token* t){
+    // alokace pameti pro int here
 
+    int num = malloc(sizeof(double));
+    if(num == NULL){
+        throw_err(INTERN_ERR);
+    }
+
+    num = 0;
+    char c;// zmena alokace na float here
+    bool IsInt = true;
+    while(getchar(c) > '0' && c < '9'){
+        num = (num * 10) + strtod(c); 
+    }
+
+    if(c == '.'){
+        float FloatTrans = num;
+        free(num);
+
+        float num = malloc(sizeof(float));
+
+        if (num == NULL){
+            throw_err(INTERN_ERR);
+        }
+
+        num = FloatTrans;
+
+        IsInt = false;
+        int i = 1;
+        while(getchar(c) > '0' && c < '9'){
+            num = num + strtof(c) * (0.1 ^ i);
+            i++;
+        }
+    }
+    
+    // return number
+    t->number_value = num;
+    if(IsInt){
+        t->type = INT;
+    }
+    else{
+        t->type = FLOAT;
+    }
 }
 
 char* get_string_literal(scanner* sc, lex_token* t){
