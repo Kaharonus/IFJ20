@@ -23,6 +23,38 @@ symbol_type translate_keyword(keyword_type kw){
     return TYPE_NONE;
 }
 
+symbol_type translate_type(lex_token_type kw){
+    switch (kw) {
+        case INT:
+            return TYPE_INT;
+        case FLOAT:
+            return TYPE_FLOAT;
+        case STRING:
+            return TYPE_STRING;
+        default:
+            throw_err(SA_ERR);
+    }
+    return TYPE_NONE;
+}
+
+
+const char parse_table[8][8] = {
+        //            +    -    *    /    (    )   ID   end
+        /* + */     {'>', '>', '<', '<', '>', '<', '>', '>'},
+        /* - */     {'>', '>', '<', '<', '<', '>', '<', '>'},
+        /* * */     {'>', '>', '>', ' ', '<', '>', '<', '>'},
+        /* / */     {'>', '>', ' ', '>', '<', '>', '<', '>'},
+        /* ( */     {'<', '<', '<', '<', '<', '=', '<', ' '},
+        /* ) */     {'>', '>', '>', '>', ' ', '>', ' ', '>'},
+        /* ID */    {'>', '>', '>', '>', ' ', '>', ' ', '>'},
+        /* end */   {'<', '<', '<', '<', '<', ' ', '<', ' '},
+};
+
+
+void check_expression(tree_node * tree, scanner *s){
+    lex_token t = get_next_token(s);
+}
+
 void check_basic_assignment(tree_node *tree, scanner *s, symbol_table **table){
 
 }
@@ -32,6 +64,25 @@ void check_assignment(tree_node *tree, scanner *s, symbol_table **table){
 }
 
 void check_variable_definition(tree_node *tree, scanner *s, symbol_table **table){
+    lex_token t = get_next_token(s);
+    if(t.type != ID){
+        throw_err(SA_ERR);
+    }
+    symbol_table * item = create_ht_item(t.string_value);
+    insert_ht(table, item);
+    t = get_next_token(s);
+    if(t.type != VAR_DEF){
+        throw_err(SA_ERR);
+    }
+
+    tree_node* node = create_node();
+    insert_node(tree, node);
+    node->type = VAR_DEFINITION;
+    node->string_value = item->id;
+    check_expression(node, s);
+}
+
+void check_return(tree_node *tree, scanner *s, symbol_table **table){
 
 }
 
@@ -117,7 +168,7 @@ void check_block(tree_node *tree, scanner *s, symbol_table **table, symbol_table
                         check_assignment(tree,s,table);
                         break;
                     case RETURN:
-                        check_variable_definition(tree,s,table);
+                        check_return(tree,s,table);
                         break;
                     default:
                         throw_err(SA_ERR);

@@ -30,6 +30,7 @@ typedef enum {
     FUNCTION_DEFINITION,
     FUNCTION_CALL,
     RETURN_VALUE,
+    VAR_DEFINITION
 } tree_node_type;
 
 typedef enum {
