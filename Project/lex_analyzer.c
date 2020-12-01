@@ -1,6 +1,6 @@
 
 #include "lex_analyzer.h"
-
+#include <math.h>
 
 bool is_letter(char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
@@ -74,44 +74,30 @@ void handle_word(scanner* sc, lex_token* t){
 void handle_number(scanner* sc, lex_token* t){
     // alokace pameti pro int here
 
-    int num = malloc(sizeof(double));
-    if(num == NULL){
-        throw_err(INTERN_ERR);
-    }
+    double num = 0;
 
     num = 0;
     char c;// zmena alokace na float here
     bool IsInt = true;
-    while(getchar(c) > '0' && c < '9'){
-        num = (num * 10) + strtod(c); 
+    while((c = (char)getc(sc->source)) > '0' && c < '9'){
+        num = (num * 10) + atoi(&c);
     }
 
     if(c == '.'){
-        float FloatTrans = num;
-        free(num);
-
-        float num = malloc(sizeof(float));
-
-        if (num == NULL){
-            throw_err(INTERN_ERR);
-        }
-
-        num = FloatTrans;
-
         IsInt = false;
-        int i = 1;
-        while(getchar(c) > '0' && c < '9'){
-            num = num + strtof(c) * (0.1 ^ i);
+        double i = 1;
+        while((c = (char)getc(sc->source)) > '0' && c < '9'){
+            num = num + (atoi(&c) * (pow(0.1, i)));
             i++;
         }
     }
-    
     // return number
-    t->number_value = num;
     if(IsInt){
+        t->number_value.i = (int)(num + 0.5);
         t->type = INT;
     }
     else{
+        t->number_value.d = num;
         t->type = FLOAT;
     }
 }

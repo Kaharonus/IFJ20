@@ -50,10 +50,37 @@ const char parse_table[8][8] = {
         /* end */   {'<', '<', '<', '<', '<', ' ', '<', ' '},
 };
 
+bool is_expression_id(lex_token t) {
+    return t.type == ID || t.type == INT || t.type == FLOAT || t.type == STRING;
+}
+
+bool is_expression_symbol(lex_token t){
+    lex_token_type type = t.type;
+    return is_expression_id(t) || type == OPEN_BRACKET || type == CLOSE_BRACKET
+    || type == ADD || type == SUB || type == MUL || type == DIV;
+}
+
+void check_expression_count(tree_node * tree, scanner *s, int openCount){
+    lex_token t = get_next_token(s);
+    bool expectId = true;
+    /*while(is_expression_symbol(t)){
+        if(expectId){
+            if(!is_expression_id(t)){
+                throw_err(SA_ERR);
+            }
+        }else{
+
+        }
+        t = get_next_token(s);
+    }*/
+}
 
 void check_expression(tree_node * tree, scanner *s){
-    lex_token t = get_next_token(s);
+    check_expression_count(tree, s, 0);
 }
+
+
+
 
 void check_basic_assignment(tree_node *tree, scanner *s, symbol_table **table){
 
