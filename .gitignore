@@ -53,3 +53,5 @@ Mkfile.old
 dkms.conf
 
 Project/cmake-build-debug/
+
+Project/ifj
