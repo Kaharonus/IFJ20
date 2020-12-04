@@ -9,6 +9,8 @@ bool is_type(lex_token* t){
     return t->keyword_value == INT_KEYWORD || t->keyword_value == FLOAT64_KEYWORD || t->keyword_value == STRING_KEYWORD;
 }
 
+void check_block(tree_node *tree, scanner *s, symbol_table **table);
+
 symbol_type translate_keyword(keyword_type kw){
     switch (kw) {
         case INT_KEYWORD:
@@ -154,8 +156,87 @@ void check_function_call(tree_node *tree, scanner *s, symbol_table **table){
     }
 }
 
+void check_for(tree_node *tree, scanner *s, symbol_table **table){
+    //get next token for
+    // check d
+    //get next token středník
 
-void check_block(tree_node *tree, scanner *s, symbol_table **table, symbol_table** root) {
+    tree_node * node = create_node()
+    node->type = FOR_LOOP;
+    insert_node(tree, node);
+
+    lex_token t = get_next_token(s);
+    if (t.type != COLLON){
+        throw_err(SA_ERR);
+    }
+
+    t = get_next_token(s);
+    
+    switch(t){
+        case GREATER:
+            node->type = CONDITION;
+            node->cond_type = OP_GR;
+            insert_node(tree, node);
+        case LESSER:
+            node->type = CONDITION;
+            node->cond_type = OP_LS;
+            insert_node(tree, node);
+        case GREATER_OR_EQ:
+            node->type = CONDITION;
+            node->cond_type = OP_GREQ;
+            insert_node(tree, node);
+        case LESSER_OR_EQ:
+            node->type = CONDITION;
+            node->cond_type = OP_LSEQ;
+            insert_node(tree, node);
+        case EQ:
+            node->type = CONDITION;
+            node->cond_type = OP_EQ;
+            insert_node(tree, node);
+        case NOT_EQ:
+            node->type = CONDITION;
+            node->cond_type = OP_NEQ;
+            insert_node(tree, node);
+        default:
+            throw_err(SA_ERR);
+    }
+
+    t = get_next_token(s);
+    if (t.type != COLLON){
+        throw_err(SA_ERR);
+    }
+
+    t = get_next_token(s);
+    if (t.type == ASSIGN){
+        node->cond_type = OP_NONE;
+        node->type = ASSIGNMENT;
+        insert_node(tree, node);
+    }
+    else{
+        throw_err(SA_ERR);
+    }
+
+    t = get_next_token(s);
+
+    if (t.type == OPEN_BRACKET){
+        check_block(tree, s, table);
+    }
+    else{
+        throw_err(SA_ERR);
+    }
+    
+    t = get_next_token(s);
+
+    if (t.type == CLOSE_BRACKET){
+        check_block(tree, s, table);
+    }
+    else{
+        throw_err(SA_ERR);
+    }
+
+}
+
+void check_block(tree_node *tree, scanner *s, symbol_table **table) {
     lex_token t = get_next_token(s);
     if (t.type != OPEN_BRACKET) {
         throw_err(SA_ERR);
@@ -212,7 +293,6 @@ void check_block(tree_node *tree, scanner *s, symbol_table **table, symbol_table
     }
 
 }
-
 
 
 void handle_fn_args(scanner*s, symbol_table * symbol){

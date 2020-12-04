@@ -26,6 +26,7 @@ typedef enum {
     EQ,
     NOT_EQ,
     COMMA,
+    COLLON,
     OPEN_PARENTHESIS,
     CLOSE_PARENTHESIS,
     OPEN_BRACKET,
