@@ -8,6 +8,7 @@
 #include "syntax_tree.h"
 #include "lex_analyzer.h"
 #include "symbol_table.h"
+#include "expression_stack.h"
 
 
 tree_node* get_syntax_tree(scanner * source, symbol_table** table);

@@ -25,7 +25,7 @@ typedef enum {
     IDENTIFICATOR,
     IF_ELSE,
     WHILE_LOOP,
-    FOR_LOOP;
+    FOR_LOOP,
     VALUE,
     FLOAT_TO_INT,
     FUNCTION_DEFINITION,

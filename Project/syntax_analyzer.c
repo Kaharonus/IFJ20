@@ -83,7 +83,6 @@ void check_expression(tree_node * tree, scanner *s){
 
 
 
-
 void check_basic_assignment(tree_node *tree, scanner *s, symbol_table **table){
 
 }
@@ -156,84 +155,104 @@ void check_function_call(tree_node *tree, scanner *s, symbol_table **table){
     }
 }
 
-void check_for(tree_node *tree, scanner *s, symbol_table **table){
-    //get next token for
-    // check d
-    //get next token středník
-
-    tree_node * node = create_node()
-    node->type = FOR_LOOP;
-    insert_node(tree, node);
+void chceck_conditon(tree_node *tree, scanner *s){
 
     lex_token t = get_next_token(s);
-    if (t.type != COLLON){
+    tree_node * node = create_node();
+
+    if (t.type != ID && t.type != INT){
         throw_err(SA_ERR);
     }
 
     t = get_next_token(s);
-    
-    switch(t){
+
+    lex_token t_next = get_next_token(s);
+
+    if (t_next.type != ID && t_next.type != INT){
+        throw_err(SA_ERR);
+    }
+
+    switch(t.type){
         case GREATER:
             node->type = CONDITION;
             node->cond_type = OP_GR;
             insert_node(tree, node);
+            break;
         case LESSER:
             node->type = CONDITION;
             node->cond_type = OP_LS;
             insert_node(tree, node);
+            break;
         case GREATER_OR_EQ:
             node->type = CONDITION;
             node->cond_type = OP_GREQ;
             insert_node(tree, node);
+            break;
         case LESSER_OR_EQ:
             node->type = CONDITION;
             node->cond_type = OP_LSEQ;
             insert_node(tree, node);
+            break;
         case EQ:
             node->type = CONDITION;
             node->cond_type = OP_EQ;
             insert_node(tree, node);
+            break;
         case NOT_EQ:
             node->type = CONDITION;
             node->cond_type = OP_NEQ;
             insert_node(tree, node);
+            break;
         default:
             throw_err(SA_ERR);
     }
 
+    return;
+}
+
+void check_for(tree_node *tree, scanner *s, symbol_table **table){
+
+    lex_token t = get_next_token(s);
+    
+    fprintf(stderr,"LEX_TOKEN  %d\n", t.type);
+
+    tree_node * for_node = create_node();
+    for_node->type = FOR_LOOP;
+    insert_node(tree, for_node);
+
     t = get_next_token(s);
+
+    if (t.type != COLLON){
+        check_expression(for_node,s);
+        if((t = get_next_token(s)).type != COLLON){
+            throw_err(SA_ERR);
+        }
+    }
+    
+    chceck_conditon(for_node, s);
+
+    t = get_next_token(s);
+
+    fprintf(stderr,"LEX_TOKEN  %d\n", t.type);
+
     if (t.type != COLLON){
         throw_err(SA_ERR);
     }
 
     t = get_next_token(s);
-    if (t.type == ASSIGN){
-        node->cond_type = OP_NONE;
-        node->type = ASSIGNMENT;
-        insert_node(tree, node);
+
+    fprintf(stderr,"LEX_TOKEN  %d\n", t.type);
+
+    if (t.type != OPEN_BRACKET){
+        check_expression(for_node, s);
     }
     else{
-        throw_err(SA_ERR);
+        unget_token(s, t);
     }
 
-    t = get_next_token(s);
+    check_block(for_node, s, table);
 
-    if (t.type == OPEN_BRACKET){
-        check_block(tree, s, table);
-    }
-    else{
-        throw_err(SA_ERR);
-    }
-    
-    t = get_next_token(s);
-
-    if (t.type == CLOSE_BRACKET){
-        check_block(tree, s, table);
-    }
-    else{
-        throw_err(SA_ERR);
-    }
-
+    return;
 }
 
 void check_block(tree_node *tree, scanner *s, symbol_table **table) {
@@ -241,6 +260,7 @@ void check_block(tree_node *tree, scanner *s, symbol_table **table) {
     if (t.type != OPEN_BRACKET) {
         throw_err(SA_ERR);
     }
+    fprintf(stderr,"LEX_TOKEN  %d\n", t.type);
     while (t.type != CLOSE_BRACKET) {
         t = get_next_token(s);
         switch (t.type) {
@@ -270,7 +290,7 @@ void check_block(tree_node *tree, scanner *s, symbol_table **table) {
                 unget_token(s,t);
                 switch (t.keyword_value) {
                     case FOR:
-                        check_basic_assignment(tree,s,table);
+                        check_for(tree,s,table);
                         break;
                     case IF:
                         check_assignment(tree,s,table);
@@ -373,7 +393,7 @@ void check_function_definition(tree_node *tree, scanner *s, symbol_table **table
     }
     unget_token(s,token);
     insert_node(tree, node);
-    check_block(node,s,sym->scope_table, table);
+    check_block(node,s, table);
 
 }
 
