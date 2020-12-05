@@ -122,7 +122,7 @@ void check_expression(tree_node * tree, scanner *s){
             case CLOSE_PARENTHESIS:;
                 bool succ = false;
                 while(!expression_stack_empty(operators)) {
-                    expression_stack_data data = expression_stack_pop(operators);
+                    data = expression_stack_pop(operators);
                     if(data.t.type == OPEN_PARENTHESIS){
                         succ = true;
                         break;
@@ -139,7 +139,6 @@ void check_expression(tree_node * tree, scanner *s){
                     while(!expression_stack_empty(operators)){
                         second = expression_stack_top(operators);
                         if(second.t.type != OPEN_PARENTHESIS && compare_precedence(t, second.t) >= 0){
-                            printf(" ");
                             expression_stack_pop(operators);
                             add_node(operands, second.t);
                         }else{
@@ -245,7 +244,7 @@ void check_for(tree_node *tree, scanner *s, symbol_table **table){
     // check d
     //get next token středník
 
-    tree_node * node = create_node()
+    tree_node * node = create_node();
     node->type = FOR_LOOP;
     insert_node(tree, node);
 
@@ -256,7 +255,7 @@ void check_for(tree_node *tree, scanner *s, symbol_table **table){
 
     t = get_next_token(s);
     
-    switch(t){
+    switch(t.type){
         case GREATER:
             node->type = CONDITION;
             node->cond_type = OP_GR;
@@ -457,7 +456,7 @@ void check_function_definition(tree_node *tree, scanner *s, symbol_table **table
     }
     unget_token(s,token);
     insert_node(tree, node);
-    check_block(node,s,sym->scope_table, table);
+    check_block(node,s,sym->scope_table);
 
 }
 

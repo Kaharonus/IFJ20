@@ -91,7 +91,7 @@ void handle_number(scanner* sc, lex_token* t){
             i++;
         }
     }
-
+    ungetc(c, sc->source);
     if(IsInt){
         t->number_value.i = (int)(num + 0.5);
         t->type = INT;
