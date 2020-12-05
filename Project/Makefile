@@ -7,7 +7,7 @@ FLAGS	 = -g -c -Wall
 LFLAGS	 = -lm
 
 all: $(OBJS)
-	$(CC) -g $(OBJS) -o $(OUT) $(LFLAGS)
+	$(CC) -g $(OBJS) -o $(OUT) $(LFLAGS) -lm
 
 error.o: error.c
 	$(CC) $(FLAGS) error.c 

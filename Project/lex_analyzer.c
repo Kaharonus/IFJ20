@@ -72,7 +72,6 @@ void handle_word(scanner* sc, lex_token* t){
 }
 
 void handle_number(scanner* sc, lex_token* t){
-    // alokace pameti pro int here
 
     double num = 0;
 
@@ -92,7 +91,7 @@ void handle_number(scanner* sc, lex_token* t){
             i++;
         }
     }
-    // return number
+
     if(IsInt){
         t->number_value.i = (int)(num + 0.5);
         t->type = INT;
@@ -235,6 +234,9 @@ lex_token get_next_token(scanner* sc){
                 return t;
             case ',':
                 t.type = COMMA;
+                return t;
+            case ';':
+                t.type = COLLON;
                 return t;
             case '(':
                 t.type = OPEN_PARENTHESIS;
