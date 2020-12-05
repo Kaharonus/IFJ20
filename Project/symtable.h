@@ -18,7 +18,8 @@ typedef enum {
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_STRING,
-    TYPE_FUNCTION
+    TYPE_FUNCTION,
+    TYPE_ID
 }symbol_type;
 
 struct argument{

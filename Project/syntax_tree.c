@@ -21,11 +21,15 @@ const char *node_types[100] = {
         "IF_ELSE",
         "WHILE_LOOP",
         "VALUE",
+        "INT_TO_FLOAT",
         "FLOAT_TO_INT",
         "FUNCTION_DEFINITION",
         "FUNCTION_CALL",
         "RETURN_VALUE",
         "VAR_DEFINITION",
+        "ASSIGN_LEFT",
+        "ASSIGN_RIGHT",
+        "DISCARD_VALUE",
         NULL
 };
 
@@ -55,6 +59,15 @@ void insert_node(tree_node* node, tree_node* new) {
     }
     node->nodes[node->subnode_len] = new;
     node->subnode_len += 1;
+}
+
+
+void remove_last_node(tree_node *node) {
+    if(node->subnode_len > 0){
+        node->nodes[node->subnode_len] = NULL;
+        node->subnode_len -= 1;
+    }
+
 }
 
 void print_node_name(tree_node * tree, int indent){

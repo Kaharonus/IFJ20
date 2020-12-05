@@ -14,11 +14,15 @@ bool expression_stack_empty(expression_stack *stack) {
     return stack->index == 0;
 }
 
-expression_stack_data expression_stack_pop(expression_stack *stack) {
+expression_stack_data expression_stack_pop(expression_stack *stack, bool* err) {
     if(!expression_stack_empty(stack)){
         stack->index--;
+        *err = false;
         return stack->data[stack->index];
     }
+    *err = true;
+    expression_stack_data ret;
+    return ret;
 }
 
 void expression_stack_push(expression_stack *stack, expression_stack_data data) {
