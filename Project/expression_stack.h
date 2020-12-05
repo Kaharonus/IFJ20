@@ -13,9 +13,15 @@
 typedef struct {
     lex_token t;
     tree_node* node;
-} SSData;
+} expression_stack_data;
 
 typedef struct {
     unsigned index;
-    SSData data[SYNTAX_STACK_MAX_SIZE];
-} SyntaxStack;
+    expression_stack_data data[1024];
+} expression_stack;
+
+void expression_stack_push(expression_stack * stack, expression_stack_data data);
+expression_stack_data expression_stack_pop(expression_stack* stack);
+expression_stack *expression_stack_init();
+bool expression_stack_empty(expression_stack* stack);
+expression_stack_data expression_stack_top(expression_stack* ss);

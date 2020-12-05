@@ -6,7 +6,7 @@
 #define PROJECT_SYNTAX_TREE_H
 
 #include "lex_token.h"
-#include "symbol_table.h"
+#include "symtable.h"
 
 #define BASE_CAPACITY 10
 
@@ -24,7 +24,7 @@ typedef enum {
     PROGRAM_ROOT,
     IDENTIFICATOR,
     IF_ELSE,
-    WHILE_LOOP,
+    FOR_LOOP,
     VALUE,
     FLOAT_TO_INT,
     FUNCTION_DEFINITION,

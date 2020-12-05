@@ -61,7 +61,23 @@ void print_node_name(tree_node * tree, int indent){
     for(int i = 0; i < indent*2; i++){
         fprintf(stderr," ");
     }
-    fprintf(stderr,"%s\n", node_types[tree->type]);
+    fprintf(stderr,"%s", node_types[tree->type]);
+    if(tree->type == VALUE){
+        switch (tree->value_type) {
+            case TYPE_INT:
+                fprintf(stderr," (%d)", tree->number_value.i);
+                break;
+            case TYPE_FLOAT:
+                fprintf(stderr," (%f)", tree->number_value.d);
+                break;
+            case TYPE_STRING:
+                fprintf(stderr," (%s)", tree->string_value);
+                break;
+            default:
+                break;
+        }
+    }
+    fprintf(stderr, "\n");
 }
 void print_tree_private(tree_node * tree, int indent){
     indent += 1;

@@ -77,16 +77,17 @@ void handle_number(scanner* sc, lex_token* t){
     double num = 0;
 
     num = 0;
-    char c;// zmena alokace na float here
+    char c = (char)getc(sc->source);
     bool IsInt = true;
-    while((c = (char)getc(sc->source)) > '0' && c < '9'){
+    while(c >= '0' && c <= '9'){
         num = (num * 10) + atoi(&c);
+        c = (char)getc(sc->source);
     }
 
     if(c == '.'){
         IsInt = false;
         double i = 1;
-        while((c = (char)getc(sc->source)) > '0' && c < '9'){
+        while((c = (char)getc(sc->source)) >= '0' && c <= '9'){
             num = num + (atoi(&c) * (pow(0.1, i)));
             i++;
         }

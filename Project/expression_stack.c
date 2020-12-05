@@ -3,3 +3,30 @@
 //
 
 #include "expression_stack.h"
+
+expression_stack *expression_stack_init() {
+    expression_stack* ptr = malloc(sizeof(expression_stack));
+    ptr->index = 0;
+    return ptr;
+}
+
+bool expression_stack_empty(expression_stack *stack) {
+    return stack->index == 0;
+}
+
+expression_stack_data expression_stack_pop(expression_stack *stack) {
+    if(!expression_stack_empty(stack)){
+        stack->index--;
+        return stack->data[stack->index];
+    }
+}
+
+void expression_stack_push(expression_stack *stack, expression_stack_data data) {
+    stack->data[stack->index] = data;
+    stack->index++;
+
+}
+
+expression_stack_data expression_stack_top(expression_stack *ss) {
+    return ss->data[ss->index - 1];
+}

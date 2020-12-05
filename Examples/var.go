@@ -1,7 +1,6 @@
 package main
 
-
 func main(){
-    a:= "str"
+    a:= 10 + 20 * 30 + 40
 }
 

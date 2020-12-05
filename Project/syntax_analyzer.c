@@ -9,6 +9,7 @@ bool is_type(lex_token* t){
     return t->keyword_value == INT_KEYWORD || t->keyword_value == FLOAT64_KEYWORD || t->keyword_value == STRING_KEYWORD;
 }
 
+
 symbol_type translate_keyword(keyword_type kw){
     switch (kw) {
         case INT_KEYWORD:
@@ -23,32 +24,40 @@ symbol_type translate_keyword(keyword_type kw){
     return TYPE_NONE;
 }
 
-symbol_type translate_type(lex_token_type kw){
-    switch (kw) {
+void set_type(lex_token t, tree_node* node){
+    node->type = VALUE;
+    switch (t.type) {
         case INT:
-            return TYPE_INT;
+            node->value_type = TYPE_INT;
+            node->number_value.i = t.number_value.i;
+            return;
         case FLOAT:
-            return TYPE_FLOAT;
+            node->value_type = TYPE_FLOAT;
+            node->number_value.d = t.number_value.d;
+            return;
         case STRING:
-            return TYPE_STRING;
+            node->value_type = TYPE_STRING;
+            node->string_value = t.string_value;
+            return;
         default:
             throw_err(SA_ERR);
     }
-    return TYPE_NONE;
 }
 
 
-const char parse_table[8][8] = {
-        //            +    -    *    /    (    )   ID   end
-        /* + */     {'>', '>', '<', '<', '>', '<', '>', '>'},
-        /* - */     {'>', '>', '<', '<', '<', '>', '<', '>'},
-        /* * */     {'>', '>', '>', ' ', '<', '>', '<', '>'},
-        /* / */     {'>', '>', ' ', '>', '<', '>', '<', '>'},
-        /* ( */     {'<', '<', '<', '<', '<', '=', '<', ' '},
-        /* ) */     {'>', '>', '>', '>', ' ', '>', ' ', '>'},
-        /* ID */    {'>', '>', '>', '>', ' ', '>', ' ', '>'},
-        /* end */   {'<', '<', '<', '<', '<', ' ', '<', ' '},
-};
+int get_precedence(lex_token_type type){
+    switch(type){
+        case ADD:
+        case SUB:
+            return 2;
+        case MUL:
+        case DIV:
+            return 1;
+        default:
+            throw_err(SA_ERR);
+    }
+    return -1;
+}
 
 bool is_expression_id(lex_token t) {
     return t.type == ID || t.type == INT || t.type == FLOAT || t.type == STRING;
@@ -56,27 +65,104 @@ bool is_expression_id(lex_token t) {
 
 bool is_expression_symbol(lex_token t){
     lex_token_type type = t.type;
-    return is_expression_id(t) || type == OPEN_BRACKET || type == CLOSE_BRACKET
+    return is_expression_id(t) || type == OPEN_PARENTHESIS || type == CLOSE_PARENTHESIS
     || type == ADD || type == SUB || type == MUL || type == DIV;
 }
 
-void check_expression_count(tree_node * tree, scanner *s, int openCount){
-    lex_token t = get_next_token(s);
-    bool expectId = true;
-    /*while(is_expression_symbol(t)){
-        if(expectId){
-            if(!is_expression_id(t)){
-                throw_err(SA_ERR);
-            }
-        }else{
+void add_node(expression_stack* ptr, lex_token t){
+    tree_node * left = expression_stack_pop(ptr).node;
+    tree_node * right = expression_stack_pop(ptr).node;
+    tree_node * new = create_node();
+    switch (t.type) {
+        case ADD:
+            new->type = ADDITION;
+            break;
+        case MUL:
+            new->type = MULTIPLICATION;
+            break;
+        case SUB:
+            new->type = SUBTRACTION;
+            break;
+        case DIV:
+            new->type = DIVISION;
+            break;
+    }
+    insert_node(new, right);
+    insert_node(new, left);
+    expression_stack_data data;
+    data.node = new;
+    expression_stack_push(ptr, data);
+};
 
-        }
-        t = get_next_token(s);
-    }*/
+
+int compare_precedence(lex_token t1, lex_token t2){
+    int t1p = get_precedence(t1.type);
+    int t2p = get_precedence(t2.type);
+    if(t1p > t2p){
+        return 1;
+    }else if(t2p > t1p){
+        return -1;
+    }
+    return 0;
 }
 
 void check_expression(tree_node * tree, scanner *s){
-    check_expression_count(tree, s, 0);
+    lex_token t = get_next_token(s);
+    bool expectId = true;
+    expression_stack* operators = expression_stack_init();
+    expression_stack* operands = expression_stack_init();
+    while(is_expression_symbol(t)){
+        expression_stack_data data;
+        switch(t.type){
+            case OPEN_PARENTHESIS:;
+                data.t = t;
+                expression_stack_push(operators, data);
+                break;
+            case CLOSE_PARENTHESIS:;
+                bool succ = false;
+                while(!expression_stack_empty(operators)) {
+                    expression_stack_data data = expression_stack_pop(operators);
+                    if(data.t.type == OPEN_PARENTHESIS){
+                        succ = true;
+                        break;
+                    }
+                    add_node(operands, t);
+                }
+                if(!succ){
+                    throw_err(SA_ERR);
+                }
+                break;
+            default:
+                if(!is_expression_id(t)){
+                    expression_stack_data second;
+                    while(!expression_stack_empty(operators)){
+                        second = expression_stack_top(operators);
+                        if(second.t.type != OPEN_PARENTHESIS && compare_precedence(t, second.t) >= 0){
+                            printf(" ");
+                            expression_stack_pop(operators);
+                            add_node(operands, second.t);
+                        }else{
+                            break;
+                        }
+                    }
+                    data.t = t;
+                    expression_stack_push(operators, data);
+
+                }else{
+                    tree_node * node = create_node();
+                    node->type = VALUE;
+                    set_type(t, node);
+                    data.node = node;
+                    expression_stack_push(operands, data);
+                }
+        }
+        t = get_next_token(s);
+    }
+    while(!expression_stack_empty(operators)) {
+        add_node(operands, expression_stack_pop(operators).t);
+    }
+    unget_token(s, t);
+    insert_node(tree, expression_stack_pop(operands).node);
 }
 
 
@@ -110,7 +196,6 @@ void check_variable_definition(tree_node *tree, scanner *s, symbol_table **table
 }
 
 void check_return(tree_node *tree, scanner *s, symbol_table **table){
-
 }
 
 void check_function_call(tree_node *tree, scanner *s, symbol_table **table){
