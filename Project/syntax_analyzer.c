@@ -213,8 +213,6 @@ void chceck_conditon(tree_node *tree, scanner *s){
 void check_for(tree_node *tree, scanner *s, symbol_table **table){
 
     lex_token t = get_next_token(s);
-    
-    fprintf(stderr,"LEX_TOKEN  %d\n", t.type);
 
     tree_node * for_node = create_node();
     for_node->type = FOR_LOOP;
@@ -233,15 +231,11 @@ void check_for(tree_node *tree, scanner *s, symbol_table **table){
 
     t = get_next_token(s);
 
-    fprintf(stderr,"LEX_TOKEN  %d\n", t.type);
-
     if (t.type != COLLON){
         throw_err(SA_ERR);
     }
 
     t = get_next_token(s);
-
-    fprintf(stderr,"LEX_TOKEN  %d\n", t.type);
 
     if (t.type != OPEN_BRACKET){
         check_expression(for_node, s);
@@ -260,7 +254,6 @@ void check_block(tree_node *tree, scanner *s, symbol_table **table) {
     if (t.type != OPEN_BRACKET) {
         throw_err(SA_ERR);
     }
-    fprintf(stderr,"LEX_TOKEN  %d\n", t.type);
     while (t.type != CLOSE_BRACKET) {
         t = get_next_token(s);
         switch (t.type) {
