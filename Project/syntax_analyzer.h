@@ -7,7 +7,7 @@
 
 #include "syntax_tree.h"
 #include "lex_analyzer.h"
-#include "symbol_table.h"
+#include "symtable.h"
 #include "expression_stack.h"
 
 

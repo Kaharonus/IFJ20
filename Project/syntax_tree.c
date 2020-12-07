@@ -21,11 +21,15 @@ const char *node_types[100] = {
         "IF_ELSE",
         "WHILE_LOOP",
         "VALUE",
+        "INT_TO_FLOAT",
         "FLOAT_TO_INT",
         "FUNCTION_DEFINITION",
         "FUNCTION_CALL",
         "RETURN_VALUE",
         "VAR_DEFINITION",
+        "ASSIGN_LEFT",
+        "ASSIGN_RIGHT",
+        "DISCARD_VALUE",
         NULL
 };
 
@@ -57,11 +61,36 @@ void insert_node(tree_node* node, tree_node* new) {
     node->subnode_len += 1;
 }
 
+
+void remove_last_node(tree_node *node) {
+    if(node->subnode_len > 0){
+        node->nodes[node->subnode_len] = NULL;
+        node->subnode_len -= 1;
+    }
+
+}
+
 void print_node_name(tree_node * tree, int indent){
     for(int i = 0; i < indent*2; i++){
         fprintf(stderr," ");
     }
-    fprintf(stderr,"%s\n", node_types[tree->type]);
+    fprintf(stderr,"%s", node_types[tree->type]);
+    if(tree->type == VALUE){
+        switch (tree->value_type) {
+            case TYPE_INT:
+                fprintf(stderr," (%d)", tree->number_value.i);
+                break;
+            case TYPE_FLOAT:
+                fprintf(stderr," (%f)", tree->number_value.d);
+                break;
+            case TYPE_STRING:
+                fprintf(stderr," (%s)", tree->string_value);
+                break;
+            default:
+                break;
+        }
+    }
+    fprintf(stderr, "\n");
 }
 void print_tree_private(tree_node * tree, int indent){
     indent += 1;

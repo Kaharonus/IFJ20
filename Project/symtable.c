@@ -2,7 +2,7 @@
 // Created by tomas on 19.11.20.
 //
 
-#include "symbol_table.h"
+#include "symtable.h"
 
 symbol_table **create_ht() {
     symbol_table** ptr = (symbol_table**)malloc(TABLE_SIZE* sizeof(symbol_table *));

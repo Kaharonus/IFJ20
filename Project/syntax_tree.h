@@ -6,7 +6,7 @@
 #define PROJECT_SYNTAX_TREE_H
 
 #include "lex_token.h"
-#include "symbol_table.h"
+#include "symtable.h"
 
 #define BASE_CAPACITY 10
 
@@ -24,14 +24,17 @@ typedef enum {
     PROGRAM_ROOT,
     IDENTIFICATOR,
     IF_ELSE,
-    WHILE_LOOP,
     FOR_LOOP,
     VALUE,
+    INT_TO_FLOAT,
     FLOAT_TO_INT,
     FUNCTION_DEFINITION,
     FUNCTION_CALL,
     RETURN_VALUE,
-    VAR_DEFINITION
+    VAR_DEFINITION,
+    ASSIGN_LEFT,
+    ASSIGN_RIGHT,
+    DISCARD_VALUE
 } tree_node_type;
 
 typedef enum {
@@ -55,15 +58,18 @@ typedef struct syntax_tree_node{
     symbol_type value_type;
 
     struct sym_table_struct* symbol;
-    unsigned int subnode_len;
 
+    unsigned int subnode_len;
     unsigned int capacity;
     struct syntax_tree_node** nodes;
 
 }tree_node;
 
+
+
 tree_node *create_node();
 void insert_node(tree_node* orig, tree_node* new);
+void remove_last_node(tree_node* tree);
 void print_tree(tree_node* tree);
 
 tree_node** get_all_expressions(tree_node* root, unsigned* len);

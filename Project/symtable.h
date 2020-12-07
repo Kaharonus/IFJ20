@@ -2,8 +2,8 @@
 // Created by tomas on 19.11.20.
 //
 
-#ifndef PROJECT_SYMBOL_TABLE_H
-#define PROJECT_SYMBOL_TABLE_H
+#ifndef PROJECT_SYMTABLE_H
+#define PROJECT_SYMTABLE_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +18,8 @@ typedef enum {
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_STRING,
-    TYPE_FUNCTION
+    TYPE_FUNCTION,
+    TYPE_ID
 }symbol_type;
 
 struct argument{
@@ -55,4 +56,4 @@ void add_ret_type(symbol_table* item,symbol_type type);
 
 void add_arg(symbol_table* item,symbol_type type, char *id);
 
-#endif //PROJECT_SYMBOL_TABLE_H
+#endif //PROJECT_SYMTABLE_H
