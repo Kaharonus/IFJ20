@@ -6,7 +6,15 @@ func test() (int,int){
 
 func main(){
 
-    a:= 50 / (20 * 30 + 40) + 10
+    c := 20
+    
+    d := "d"
+    
+    if c > d {
+    }else{
+    }
+    
+    /*a:= 50 / (20 * 30 + 40) + 10
     a, _ = test()
 
     b := 10.10
@@ -22,7 +30,7 @@ func main(){
 
     a,b = 10,20
     b,_ = a, 20+30
-    a, b = test()
+    a, b = test()*/
 
 }
 

@@ -125,6 +125,10 @@ void add_node(expression_stack* ptr, lex_token t){
         insert_node(new, right);
         insert_node(new, left);
     }
+    if(left->value_type == TYPE_STRING && t.type != ADD){
+        throw_err(TYPE_ERR);
+    }
+
 
     switch (t.type) {
         case ADD:
@@ -474,38 +478,37 @@ void check_condition(tree_node *tree, scanner *s, symbol_table** table){
         case GREATER:
             node->type = CONDITION;
             node->cond_type = OP_GR;
-            insert_node(tree, node);
             break;
         case LESSER:
             node->type = CONDITION;
             node->cond_type = OP_LS;
-            insert_node(tree, node);
             break;
         case GREATER_OR_EQ:
             node->type = CONDITION;
             node->cond_type = OP_GREQ;
-            insert_node(tree, node);
             break;
         case LESSER_OR_EQ:
             node->type = CONDITION;
             node->cond_type = OP_LSEQ;
-            insert_node(tree, node);
             break;
         case EQ:
             node->type = CONDITION;
             node->cond_type = OP_EQ;
-            insert_node(tree, node);
             break;
         case NOT_EQ:
             node->type = CONDITION;
             node->cond_type = OP_NEQ;
-            insert_node(tree, node);
             break;
         default:
             throw_err(SA_ERR);
     }
     check_expression(node, s, table);
+    insert_node(tree, node);
 
+    if(node->subnode_len != 2){
+        throw_err(SA_ERR);
+    }
+    
 }
 
 

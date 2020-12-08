@@ -46,12 +46,15 @@ void handle_comments(scanner* sc){
             checkChar = (char)getc(sc->source);
         }
     } else if (secondChar == '*'){
-        char checkChar;
-        char checkChar2;
+        char previous;
+        char current;
         do{
-            checkChar = (char)getc(sc->source);
-            checkChar2 = (char)getc(sc->source);
-        }while (checkChar != '*' || checkChar2 != '/');
+            current = (char)getc(sc->source);
+            if(previous == '*' && current == '/'){
+                break;
+            }
+            previous = current;
+        }while (true);
     }
 
 }
