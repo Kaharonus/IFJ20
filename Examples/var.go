@@ -1,7 +1,7 @@
 package main
 
 func test() (int,int){
-    
+    return 1, 2+3
 }
 
 func main(){
@@ -12,11 +12,17 @@ func main(){
     b := 10.10
     _ = 10 + a
     
+    if a > b{
+        a = b
+    }
     
+    else{
+        b = a
+    }
 
     a,b = 10,20
     b,_ = a, 20+30
-    a = test()
+    a, b = test()
 
 }
 

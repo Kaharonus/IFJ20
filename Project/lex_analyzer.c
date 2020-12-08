@@ -100,10 +100,6 @@ void handle_number(scanner* sc, lex_token* t){
         t->number_value.d = num;
         t->type = FLOAT;
     }
-
-    if (!is_num_char(c)){
-        ungetc(c, sc->source);
-    }
     return;
 }
 
@@ -208,11 +204,11 @@ lex_token token_stack_pop(token_stack* ts) {
     if (!token_stack_empty(ts)) {
         ts->index--;
     }
-    return ts->data[ts->index+1];
+    return ts->data[ts->index];
 }
 void token_stack_push(token_stack * ts, lex_token t) {
-    ts->index++;
     ts->data[ts->index] = t;
+    ts->index++;
 }
 
 

@@ -293,7 +293,7 @@ void check_basic_assignment(tree_node *tree, scanner *s, symbol_table **table){
         insert_node(type_node, right->nodes[0]->nodes[0]);
         remove_last_node(right->nodes[0]);
         insert_node(right->nodes[0], type_node);
-        if(expression_type == FLOAT){
+        if(expression_type == TYPE_FLOAT){
             type_node->type = FLOAT_TO_INT;
         }else{
             type_node->type = INT_TO_FLOAT;
@@ -372,7 +372,7 @@ void check_assignment(tree_node *tree, scanner *s, symbol_table **table){
         }
         //Here conversion from int to double or the other way around has to happen at the end of the expression
         tree_node * type_node = create_node();
-        if(left_node->value_type == FLOAT){
+        if(left_node->value_type == TYPE_FLOAT){
             type_node->type = FLOAT_TO_INT;
         }else{
             type_node->type = INT_TO_FLOAT;
@@ -404,7 +404,23 @@ void check_variable_definition(tree_node *tree, scanner *s, symbol_table **table
 }
 
 void check_return(tree_node *tree, scanner *s, symbol_table **table){
+    lex_token t = get_next_token(s);
+    if(t.type != KEYWORD && t.keyword_value != RETURN){
+        throw_err(SA_ERR);
+    }
+    while(t.type != END_OF_LINE){
+        check_expression(tree,s,table);
+        t = get_next_token(s);
+        if(t.type != COMMA ){
+            if(t.type == END_OF_LINE || t.type == CLOSE_BRACKET){
+                break;
+            }
+            throw_err(SA_ERR);
+        }
+    }
 }
+
+
 
 void check_function_call(tree_node *tree, scanner *s, symbol_table **table){
     lex_token token = get_next_token(s);
@@ -447,22 +463,12 @@ void check_function_call(tree_node *tree, scanner *s, symbol_table **table){
     }
 }
 
-void chceck_conditon(tree_node *tree, scanner *s){
+void check_condition(tree_node *tree, scanner *s, symbol_table** table){
+
+    tree_node * node = create_node();
+    check_expression(node, s, table);
 
     lex_token t = get_next_token(s);
-    tree_node * node = create_node();
-
-    if (t.type != ID && t.type != INT){
-        throw_err(SA_ERR);
-    }
-
-    t = get_next_token(s);
-
-    lex_token t_next = get_next_token(s);
-
-    if (t_next.type != ID && t_next.type != INT){
-        throw_err(SA_ERR);
-    }
 
     switch(t.type){
         case GREATER:
@@ -498,9 +504,41 @@ void chceck_conditon(tree_node *tree, scanner *s){
         default:
             throw_err(SA_ERR);
     }
+    check_expression(node, s, table);
 
-    return;
 }
+
+
+void check_if(tree_node* tree, scanner *s , symbol_table **table){
+    lex_token t = get_next_token(s);
+    if(t.type != KEYWORD && t.keyword_value != IF){
+        throw_err(SA_ERR);
+    }
+    tree_node * node = create_node();
+    node->type = IF_ELSE;
+    check_condition(node,s,table);
+    t = get_next_token(s);
+    if(t.type != OPEN_BRACKET){
+        throw_err(SA_ERR);
+    }
+    unget_token(s,t);
+    check_block(node, s, table);
+    t = get_next_token(s);
+    while(t.type == END_OF_LINE){
+        t = get_next_token(s);
+    }
+    if(t.type != KEYWORD && t.type != ELSE){
+        throw_err(SA_ERR);
+    }
+    t = get_next_token(s);
+    if(t.type != OPEN_BRACKET){
+        throw_err(SA_ERR);
+    }
+    unget_token(s,t);
+    check_block(node, s, table);
+    insert_node(tree, node);
+}
+
 
 void check_for(tree_node *tree, scanner *s, symbol_table **table){
 
@@ -509,17 +547,14 @@ void check_for(tree_node *tree, scanner *s, symbol_table **table){
     tree_node * for_node = create_node();
     for_node->type = FOR_LOOP;
     insert_node(tree, for_node);
-
+    check_variable_definition(for_node, s, table);
     t = get_next_token(s);
 
     if (t.type != COLLON){
-        check_expression(for_node,s);
-        if((t = get_next_token(s)).type != COLLON){
-            throw_err(SA_ERR);
-        }
+       throw_err(SA_ERR);
     }
-    
-    chceck_conditon(for_node, s);
+
+    check_condition(for_node, s, table);
 
     t = get_next_token(s);
 
@@ -530,15 +565,14 @@ void check_for(tree_node *tree, scanner *s, symbol_table **table){
     t = get_next_token(s);
 
     if (t.type != OPEN_BRACKET){
-        check_expression(for_node, s);
+        unget_token(s,t);
+        check_basic_assignment(for_node, s, table);
     }
     else{
         unget_token(s, t);
     }
 
     check_block(for_node, s, table);
-
-    return;
 }
 
 void check_block(tree_node *tree, scanner *s, symbol_table **table) {
@@ -578,7 +612,7 @@ void check_block(tree_node *tree, scanner *s, symbol_table **table) {
                         check_for(tree,s,table);
                         break;
                     case IF:
-                        //check_assignment(tree,s,table);
+                        check_if(tree,s,table);
                         break;
                     case RETURN:
                         check_return(tree,s,table);
