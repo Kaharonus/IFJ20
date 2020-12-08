@@ -4,6 +4,7 @@
 #include "lex_token.h"
 #include "syntax_tree.h"
 #include "syntax_analyzer.h"
+#include "semantic_analyzer.h"
 
 int main(int argc, char *argv[]) {
     scanner scan;
@@ -16,6 +17,7 @@ int main(int argc, char *argv[]) {
     scan.stack.index = 0;
     symbol_table ** table = create_ht();
     tree_node* tree = get_syntax_tree(&scan, table);
+    check_semantics(tree, table);
     print_tree(tree);
 
     return 0;

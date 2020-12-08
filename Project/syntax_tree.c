@@ -105,3 +105,26 @@ void print_tree(tree_node * tree){
     print_tree_private(tree, -1);
     fprintf(stderr,"Konec stromu\n");
 }
+
+void traverse_left(tree_node* tree,tree_node** result, int *counter, int *currentCap);
+
+void traverse_left(tree_node *tree, tree_node **result, int *counter, int *currentCap) {
+    result[*counter] = tree;
+    (*counter)++;
+    for(unsigned i = 0; i < tree->subnode_len; i++){
+        if(*counter + 2 >= *currentCap){
+            *currentCap += 1024;
+            result = realloc(result, sizeof(tree_node*)* *currentCap);
+        }
+        traverse_left(tree->nodes[i],result, counter, currentCap);
+    }
+}
+
+tree_node **get_preorder(tree_node *root, int *size) {
+    int cap = 1024;
+    tree_node** result = malloc(sizeof(tree_node*) * cap);
+    traverse_left(root, result, size, &cap);
+    return result;
+}
+
+

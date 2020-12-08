@@ -72,7 +72,6 @@ void insert_node(tree_node* orig, tree_node* new);
 void remove_last_node(tree_node* tree);
 void print_tree(tree_node* tree);
 
-tree_node** get_all_expressions(tree_node* root, unsigned* len);
-
+tree_node **get_preorder(tree_node* root, int* size);
 
 #endif //PROJECT_SYNTAX_TREE_H
