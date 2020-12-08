@@ -100,6 +100,11 @@ void handle_number(scanner* sc, lex_token* t){
         t->number_value.d = num;
         t->type = FLOAT;
     }
+
+    if (!is_num_char(c)){
+        ungetc(c, sc->source);
+    }
+    return;
 }
 
 char* get_string_literal(scanner* sc, lex_token* t){
