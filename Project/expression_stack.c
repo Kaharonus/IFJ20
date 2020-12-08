@@ -3,9 +3,11 @@
 //
 
 #include "expression_stack.h"
+#include "garbage_collector.h"
 
 expression_stack *expression_stack_init() {
     expression_stack* ptr = malloc(sizeof(expression_stack));
+    add_to_gc(ptr);
     ptr->index = 0;
     return ptr;
 }

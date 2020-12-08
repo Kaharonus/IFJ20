@@ -1,5 +1,6 @@
 
 #include "lex_analyzer.h"
+#include "garbage_collector.h"
 #include <math.h>
 
 bool is_letter(char c) {
@@ -28,6 +29,7 @@ int read_next_word(scanner * source, char* word, int size){
             if(word == NULL){
                 throw_err(INTERN_ERR);
             }
+            update_gc(t, word);
         }
         word[counter] = c;
         counter++;
@@ -64,6 +66,7 @@ void handle_word(scanner* sc, lex_token* t){
     if(word == NULL){
         throw_err(INTERN_ERR);
     }
+    add_to_gc(word);
     read_next_word(sc, word, 256);
     t->keyword_value = get_keyword(word);
     if(t->keyword_value != NOT_KEYWORD){
@@ -112,6 +115,8 @@ char* get_string_literal(scanner* sc, lex_token* t){
     if (strLiteral == NULL){
         throw_err(INTERN_ERR);
     }
+    add_to_gc(strLiteral);
+
     int first;
     int second;
     int res;

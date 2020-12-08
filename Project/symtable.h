@@ -25,7 +25,7 @@ typedef enum {
 struct argument{
     char* id;
     symbol_type  type;
-    struct argument* nextArg;
+    struct argument* next_arg;
 };
 
 typedef struct sym_table_struct{

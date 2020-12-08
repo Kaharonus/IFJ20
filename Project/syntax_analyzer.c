@@ -407,13 +407,27 @@ void check_variable_definition(tree_node *tree, scanner *s, symbol_table **table
     item->type = node->value_type;
 }
 
+lex_token remove_after_return(scanner *s){
+    lex_token t = get_next_token(s);
+    while(t.type != CLOSE_BRACKET){
+        if(t.type == OPEN_BRACKET){
+            remove_after_return(s);
+        }
+        t = get_next_token(s);
+    }
+    return t;
+}
+
 void check_return(tree_node *tree, scanner *s, symbol_table **table){
     lex_token t = get_next_token(s);
     if(t.type != KEYWORD && t.keyword_value != RETURN){
         throw_err(SA_ERR);
     }
+
+    tree_node * node = create_node();
+    node->type = RETURN_VALUE;
     while(t.type != END_OF_LINE){
-        check_expression(tree,s,table);
+        check_expression(node,s,table);
         t = get_next_token(s);
         if(t.type != COMMA ){
             if(t.type == END_OF_LINE || t.type == CLOSE_BRACKET){
@@ -422,6 +436,8 @@ void check_return(tree_node *tree, scanner *s, symbol_table **table){
             throw_err(SA_ERR);
         }
     }
+    unget_token(s,remove_after_return(s));
+    insert_node(tree, node);
 }
 
 
@@ -508,7 +524,15 @@ void check_condition(tree_node *tree, scanner *s, symbol_table** table){
     if(node->subnode_len != 2){
         throw_err(SA_ERR);
     }
-    
+    tree_node * left = node->nodes[0];
+    tree_node * right = node->nodes[1];
+    if(left->value_type == right->value_type){
+        return;
+    }
+    if(left->value_type == TYPE_STRING || right->value_type == TYPE_STRING){
+        throw_err(SEM_ERR);
+    }
+
 }
 
 
@@ -550,14 +574,24 @@ void check_for(tree_node *tree, scanner *s, symbol_table **table){
     tree_node * for_node = create_node();
     for_node->type = FOR_LOOP;
     insert_node(tree, for_node);
-    check_variable_definition(for_node, s, table);
+
+    t = get_next_token(s);
+    unget_token(s,t);
+    if(t.type != COLLON){
+        check_variable_definition(for_node, s, table);
+    }
     t = get_next_token(s);
 
     if (t.type != COLLON){
        throw_err(SA_ERR);
     }
 
-    check_condition(for_node, s, table);
+    t = get_next_token(s);
+
+    if (t.type != COLLON){
+        unget_token(s,t);
+        check_condition(for_node, s, table);
+    }
 
     t = get_next_token(s);
 
@@ -583,6 +617,9 @@ void check_block(tree_node *tree, scanner *s, symbol_table **table) {
     if (t.type != OPEN_BRACKET) {
         throw_err(SA_ERR);
     }
+    tree_node * block = create_node();
+    block->type = BLOCK;
+    insert_node(tree, block);
     while (t.type != CLOSE_BRACKET) {
         t = get_next_token(s);
         switch (t.type) {
@@ -593,16 +630,16 @@ void check_block(tree_node *tree, scanner *s, symbol_table **table) {
                 unget_token(s,t);
                 switch (nextID.type) {
                     case ASSIGN:
-                        check_basic_assignment(tree,s,table);
+                        check_basic_assignment(block,s,table);
                         break;
                     case COMMA:
-                        check_assignment(tree,s,table);
+                        check_assignment(block,s,table);
                         break;
                     case VAR_DEF:
-                        check_variable_definition(tree,s,table);
+                        check_variable_definition(block,s,table);
                         break;
                     case OPEN_PARENTHESIS:
-                        check_function_call(tree,s,table);
+                        check_function_call(block,s,table);
                         break;
                     default:
                         throw_err(SA_ERR);
@@ -612,13 +649,13 @@ void check_block(tree_node *tree, scanner *s, symbol_table **table) {
                 unget_token(s,t);
                 switch (t.keyword_value) {
                     case FOR:
-                        check_for(tree,s,table);
+                        check_for(block,s,table);
                         break;
                     case IF:
-                        check_if(tree,s,table);
+                        check_if(block,s,table);
                         break;
                     case RETURN:
-                        check_return(tree,s,table);
+                        check_return(block,s,table);
                         break;
                     default:
                         throw_err(SA_ERR);
@@ -688,7 +725,9 @@ void check_function_definition(tree_node *tree, scanner *s, symbol_table **table
     if(token.type != ID){
         throw_err(SA_ERR);
     }
+    node->string_value = token.string_value;
     symbol_table* sym = create_ht_item(token.string_value);
+    node->symbol = sym;
     insert_ht(table, sym);
     sym->type = TYPE_FUNCTION;
     token = get_next_token(s);

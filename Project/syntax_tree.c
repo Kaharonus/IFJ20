@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "syntax_tree.h"
 #include "error.h"
+#include "garbage_collector.h"
 
 const char *node_types[100] = {
         "EXPRESSION",
@@ -19,7 +20,7 @@ const char *node_types[100] = {
         "PROGRAM_ROOT",
         "IDENTIFICATOR",
         "IF_ELSE",
-        "WHILE_LOOP",
+        "FOR_LOOP",
         "VALUE",
         "INT_TO_FLOAT",
         "FLOAT_TO_INT",
@@ -39,6 +40,8 @@ tree_node *create_node() {
         throw_err(INTERN_ERR);
 
     }
+    add_to_gc(node);
+
     node->type = PROGRAM_ROOT;
     node->subnode_len = 0;
     node->capacity = BASE_CAPACITY;
@@ -49,13 +52,16 @@ tree_node *create_node() {
     if (node->nodes == NULL) {
         throw_err(INTERN_ERR);
     }
+    add_to_gc(node->nodes);
     return node;
 }
 void insert_node(tree_node* node, tree_node* new) {
     if ((node->subnode_len + 1) > node->capacity) {
-        tree_node ** tmp = node->nodes;
-        node->nodes = realloc(node->nodes, node->capacity * 10);
         node->capacity *= 10;
+        tree_node ** tmp = node->nodes;
+        node->nodes = realloc(node->nodes, node->capacity * sizeof(tree_node*));
+        update_gc(tmp, node->nodes);
+
     }
     node->nodes[node->subnode_len] = new;
     node->subnode_len += 1;
@@ -113,8 +119,13 @@ void traverse_left(tree_node *tree, tree_node **result, int *counter, int *curre
     (*counter)++;
     for(unsigned i = 0; i < tree->subnode_len; i++){
         if(*counter + 2 >= *currentCap){
+            tree_node ** tmp = result;
             *currentCap += 1024;
             result = realloc(result, sizeof(tree_node*)* *currentCap);
+            if(result == NULL){
+                throw_err(INTERN_ERR);
+            }
+            update_gc(tmp, result);
         }
         traverse_left(tree->nodes[i],result, counter, currentCap);
     }
@@ -123,6 +134,7 @@ void traverse_left(tree_node *tree, tree_node **result, int *counter, int *curre
 tree_node **get_preorder(tree_node *root, int *size) {
     int cap = 1024;
     tree_node** result = malloc(sizeof(tree_node*) * cap);
+    add_to_gc(result);
     traverse_left(root, result, size, &cap);
     return result;
 }

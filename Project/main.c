@@ -5,6 +5,7 @@
 #include "syntax_tree.h"
 #include "syntax_analyzer.h"
 #include "semantic_analyzer.h"
+#include "garbage_collector.h"
 
 int main(int argc, char *argv[]) {
     scanner scan;
@@ -13,6 +14,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr,"File cannot be opened");
         throw_err(INTERN_ERR);
     }
+    init_gc();
     scan.source = f;
     scan.stack.index = 0;
     symbol_table ** table = create_ht();
@@ -20,5 +22,7 @@ int main(int argc, char *argv[]) {
     check_semantics(tree, table);
     print_tree(tree);
 
+    free_gc();
+    fclose(f);
     return 0;
 }

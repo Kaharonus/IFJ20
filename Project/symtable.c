@@ -3,9 +3,11 @@
 //
 
 #include "symtable.h"
+#include "garbage_collector.h"
 
 symbol_table **create_ht() {
     symbol_table** ptr = (symbol_table**)malloc(TABLE_SIZE* sizeof(symbol_table *));
+    add_to_gc(ptr);
     for(int i = 0; i < TABLE_SIZE; i++){
         ptr[i] = NULL;
     }
@@ -15,13 +17,17 @@ symbol_table **create_ht() {
 symbol_table *create_ht_item(char *id) {
     symbol_table* ptr = (symbol_table*)malloc(sizeof(symbol_table));
     if(ptr == NULL)
-        return NULL;
+        throw_err(INTERN_ERR);
+
+    add_to_gc(ptr);
     ptr->has_been_defined = false;
     ptr->ptrNext = NULL;
     ptr->id = id;
     ptr->return_types = malloc(sizeof(struct argument));
+    add_to_gc(ptr->return_types);
     ptr->ret_type_count = 0;
     ptr->args = malloc(sizeof(struct argument));
+    add_to_gc(ptr->args);
     ptr->arg_count = 0;
     ptr->type = TYPE_NONE;
     return ptr;
@@ -91,9 +97,10 @@ symbol_table *search_ht(symbol_table **hashTable, char *id) {
 void add_arg(symbol_table *item, symbol_type type, char *id) {
     struct argument* loc = item->args;
     for(int i = 0; i < item->arg_count; i++){
-        loc = item->args->nextArg;
+        loc = item->args->next_arg;
     }
-    loc->nextArg = malloc(sizeof(struct argument));
+    loc->next_arg = malloc(sizeof(struct argument));
+    add_to_gc(loc->next_arg);
     loc->id = id;
     loc->type = type;
     item->arg_count++;
@@ -103,9 +110,10 @@ void add_arg(symbol_table *item, symbol_type type, char *id) {
 void add_ret_type(symbol_table *item, symbol_type type) {
     struct argument* loc = item->return_types;
     for(int i = 0; i < item->ret_type_count; i++){
-        loc = item->return_types->nextArg;
+        loc = item->return_types->next_arg;
     }
-    loc->nextArg = malloc(sizeof(struct argument));
+    loc->next_arg = malloc(sizeof(struct argument));
+    add_to_gc(loc->next_arg);
     loc->type = type;
     item->ret_type_count++;
 }
