@@ -130,15 +130,15 @@ char* get_string_literal(scanner* sc, lex_token* t){
         if (c == '\\'){
             c = (char)getc(sc->source);
             switch(c){
-                case '\"':
+                case '"':
                     strLiteral[i] = '\"';
                     i++;
                     break;
-                case '\n':
+                case 'n':
                     strLiteral[i] = '\n';
                     i++;
                     break;
-                case '\t':
+                case 't':
                     strLiteral[i] = '\t';
                     i++;
                     break;

@@ -6,6 +6,8 @@
 #include "syntax_analyzer.h"
 #include "semantic_analyzer.h"
 #include "garbage_collector.h"
+#include "code_generation.h"
+
 
 int main(int argc, char *argv[]) {
     scanner scan;
@@ -20,8 +22,8 @@ int main(int argc, char *argv[]) {
     symbol_table ** table = create_ht();
     tree_node* tree = get_syntax_tree(&scan, table);
     check_semantics(tree, table);
-    print_tree(tree);
-
+    generate_code(tree, table);
+    //print_tree(tree);
     free_gc();
     fclose(f);
     return 0;

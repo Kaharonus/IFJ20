@@ -4,6 +4,8 @@ package main
 
 
 func main() {
+    c:=10
+    c = c / 0
     test2()
 }
 

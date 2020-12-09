@@ -147,6 +147,8 @@ void add_node(expression_stack* ptr, lex_token t){
                 new->type = INT_DIVISION;
             }
             break;
+        default:
+            break;
     }
 
     expression_stack_data data;
@@ -158,7 +160,6 @@ symbol_type check_expression(tree_node * tree, scanner *s, symbol_table** table)
     lex_token t = get_next_token(s);
     expression_stack* operators = expression_stack_init();
     expression_stack* operands = expression_stack_init();
-    symbol_type result;
     while(is_expression_symbol(t)){
         expression_stack_data data;
         bool err = false;
@@ -554,7 +555,7 @@ void check_if(tree_node* tree, scanner *s , symbol_table **table){
     while(t.type == END_OF_LINE){
         t = get_next_token(s);
     }
-    if(t.type != KEYWORD && t.type != ELSE){
+    if(t.type != KEYWORD && t.keyword_value != ELSE){
         throw_err(SA_ERR);
     }
     t = get_next_token(s);

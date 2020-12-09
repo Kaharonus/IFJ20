@@ -6,11 +6,14 @@
 #include "error.h"
 
 
-void check_function_call_semantics(tree_node** nodes, const int *index, symbol_table ** table){
-    tree_node * call = nodes[*index];
+void check_function_call_semantics(tree_node* call, const int *index, symbol_table ** table){
     symbol_table * item = search_ht(table, call->string_value);
     if(item == NULL){
         throw_err(SA_ERR);
+    }
+    call->symbol = item;
+    if(item->arg_count == -1){ //vestavěné funkce může mít -1
+        return;
     }
     if(item->arg_count != call->subnode_len){
         throw_err(PARAM_ERR);
@@ -41,26 +44,13 @@ void check_assignment_semantics(tree_node** nodes, int *index, symbol_table ** t
 }
 
 void check_zero_division(tree_node* node){
-}
-
-
-int find_index(tree_node** from, int size, tree_node* of){
-    for(int i = 0; i < size; i++){
-        if(from[i] == of){
-            return i;
-        }
+    tree_node * n =node->nodes[node->subnode_len-1];
+    if(n->type != VALUE){
+        return;
     }
-    return -1;
-}
-
-int find_last(tree_node** from, int size, tree_node_type type){
-    int last = -1;
-    for(int i = 0; i < size ; i++){
-        if(from[i]->type == type){
-            last = i;
-        }
+    if((n->value_type == TYPE_INT && n->number_value.i == 0) || (n->value_type == TYPE_FLOAT && n->number_value.d == 0)){
+        throw_err(ZERO_DIV_ERR);
     }
-    return last;
 }
 
 void check_last_pair(tree_node* node){
@@ -114,7 +104,76 @@ void check_return_semantics(tree_node* node, symbol_table** table){
     check_last_pair(node->nodes[node->subnode_len-1]);
 }
 
+void create_inputs(symbol_table ** table){
+    symbol_table * inputs = create_ht_item("inputs");
+    add_ret_type(inputs, TYPE_STRING);
+    add_ret_type(inputs, TYPE_INT);
+    insert_ht(table, inputs);
+
+    symbol_table * inputi = create_ht_item("inputi");
+    add_ret_type(inputi, TYPE_INT);
+    add_ret_type(inputi, TYPE_INT);
+    insert_ht(table, inputi);
+
+    symbol_table * inputf = create_ht_item("inputf");
+    add_ret_type(inputf, TYPE_FLOAT);
+    add_ret_type(inputf, TYPE_INT);
+    insert_ht(table, inputf);
+}
+
+void create_type_conversions(symbol_table ** table){
+    symbol_table * int2float = create_ht_item("int2float");
+    add_ret_type(int2float, TYPE_FLOAT);
+    add_arg(int2float, TYPE_INT, "i");
+    insert_ht(table, int2float);
+
+    symbol_table * float2int = create_ht_item("float2int");
+    add_ret_type(float2int, TYPE_INT);
+    add_arg(float2int, TYPE_FLOAT, "f");
+    insert_ht(table, float2int);
+}
+
+void create_string_functions(symbol_table ** table){
+    symbol_table * int2float = create_ht_item("len");
+    add_ret_type(int2float, TYPE_INT);
+    add_arg(int2float, TYPE_STRING, "s");
+    insert_ht(table, int2float);
+
+    symbol_table * substr = create_ht_item("substr");
+    add_ret_type(substr, TYPE_STRING);
+    add_ret_type(substr, TYPE_INT);
+    add_arg(substr, TYPE_STRING, "s");
+    add_arg(substr, TYPE_INT, "i");
+    add_arg(substr, TYPE_INT, "n");
+    insert_ht(table, substr);
+
+    symbol_table * ord = create_ht_item("ord");
+    add_ret_type(ord, TYPE_INT);
+    add_ret_type(ord, TYPE_INT);
+    add_arg(ord, TYPE_STRING, "s");
+    add_arg(ord, TYPE_INT, "i");
+    insert_ht(table, ord);
+
+    symbol_table * chr = create_ht_item("chr");
+    add_ret_type(chr, TYPE_STRING);
+    add_ret_type(chr,TYPE_INT);
+    add_arg(chr, TYPE_INT, "i");
+    insert_ht(table, chr);
+
+}
+
+void add_build_in(symbol_table** table){
+    create_inputs(table);
+    symbol_table * print = create_ht_item("print");
+    print->arg_count = -1;
+    insert_ht(table, print);
+    create_type_conversions(table);
+    create_string_functions(table);
+
+}
+
 void check_semantics(tree_node *node, symbol_table **table) {
+    add_build_in(table);
     int size = 0;
     bool contains_main = false;
     tree_node ** nodes = get_preorder(node, &size);
@@ -130,7 +189,7 @@ void check_semantics(tree_node *node, symbol_table **table) {
                 check_return_semantics(nodes[i], table);
                 break;
             case FUNCTION_CALL:
-                check_function_call_semantics(nodes, &i , table);
+                check_function_call_semantics(nodes[i], &i , table);
                 break;
             case ASSIGNMENT:
                 check_assignment_semantics(nodes, &i, table);
